@@ -75,6 +75,15 @@ func while(limit int) int {
 	return sum
 }
 
+// スライスやマップの繰り返しにはrangeを利用する。
+// rangeはインデックスと値を返す。
+func primes() {
+	var primes = []int{2, 3, 5, 7, 11, 13, 17, 19}
+	for i, v := range primes {
+		fmt.Println(i, v)
+	}
+}
+
 // 分岐処理
 // if:forと同様に条件式の前に簡単なステートメントを記述することができる
 func pow(x, n, limit float64) float64 {
@@ -135,6 +144,7 @@ func point(p1 int) {
 // sliceは長さ（length）と容量（capacity）を持っている
 // それぞれlen()とcap()で取得できる。
 // sliceの長さ、容量がゼロの時はnilになる
+// 末尾追加: append(s, vs ...T) []T 追加先のスライスの容量を超える場合は参照先を変更したスライスを返す。
 func printL() {
 	var l [10]int
 	s := l[1:5]
@@ -159,6 +169,27 @@ func printL() {
 	}
 }
 
+// Map
+// map[キーの型]値の型　キーと値のリスト。
+// make(map[キーの型]値の型)もしくはmap[キーの型]値の型{キー:値, ...}で初期化
+// v,e = m[key]とすることで、値と値の存在の真偽値を取得できる。存在しない場合、ゼロ値とfalseが代入される。
+func getPersonInfo() map[string]int {
+	type Person struct {
+		Age    int
+		Height int
+		Weight int
+	}
+	p := Person{11, 180, 70}
+	fmt.Println(p.Age, p.Height, p.Weight)
+	personInfo := make(map[string]int)
+	personInfo["age"] = p.Age
+	personInfo["height"] = p.Height
+	personInfo["weight"] = p.Weight
+	v, e := personInfo["color"]
+	fmt.Println(v, e)
+	return personInfo
+}
+
 func main() {
 	// rand.Seed(time.Now().UnixNano())
 	// fmt.Println("hello world!")
@@ -180,5 +211,7 @@ func main() {
 	// greet()
 	// delay()
 	// point(29)
-	printL()
+	//printL()
+	// primes()
+	fmt.Println(getPersonInfo())
 }
