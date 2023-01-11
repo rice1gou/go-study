@@ -7,10 +7,10 @@ import (
 	"math"
 	// 複素数パッケージ
 	"math/cmplx"
-	// ランダム数値取得用
-
 	// 時間取得のパッケージ
 	"time"
+	// 文字列操作パッケージ
+	"strings"
 )
 
 // 変数定義
@@ -188,6 +188,19 @@ func getPersonInfo() map[string]int {
 	v, e := personInfo["color"]
 	fmt.Println(v, e)
 	return personInfo
+}
+
+func WordCounter(s string) map[string]int {
+	wordList := strings.Split(s, " ")
+	wc := make(map[string]int)
+	for _, v := range wordList {
+		if _, ok := wc[v]; ok {
+			wc[v] += 1
+		} else {
+			wc[v] = 1
+		}
+	}
+	return wc
 }
 
 func main() {
