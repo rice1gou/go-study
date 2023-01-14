@@ -95,6 +95,7 @@ func pow(x, n, limit float64) float64 {
 
 // switch: 条件ステートメントを書けばその条件に一致するcaseブロックへ、
 // 省略するとcase文の条件式がtrueになるブロックへ分岐する。
+// case文に型を記述することによって値に渡されたインターフェイスの型との比較ができる
 func greet() {
 	t := time.Now()
 	switch {
@@ -203,6 +204,51 @@ func WordCounter(s string) map[string]int {
 	return wc
 }
 
+// クロージャ: 内部変数にアクセス可能な関数を渡す関数
+// adderは内部変数sumにアクセス可能な関数を返す。
+// func adder() func() int {
+// 	sum := 0
+// 	return func (x int) int {
+// 		sum += x
+// 		return sum
+// 	}
+// }
+// pos := adder()
+// pos(1) -> 1
+// pos(1) -> 2
+// pos(4) -> 6
+
+func fibonacci() func() int {
+	n, n1 := 0, 1
+	return func() int {
+		v := n
+		n, n1 = n1, n+n1
+		return v
+	}
+}
+
+// メソッド：同パッケージ内で定義した型にメソッドを定義することができる
+// func (変数 レシーバーの型) メソッド名(メソッドの引数 引数の型) 戻り値
+// レシーバーの型をポインタにすると、ポインタレシーバになる。レシーバーが指す変数を更新することができる。
+// func (v *T) M(),func F(v *T)があるとすると、v.M(),(&v).M()はコンパイルエラーにならない
+// F(v)はエラーにならないが、F(&v)はエラーになる。これは暗黙的にvのステートメントを&vとして解釈しているからである。
+// 逆に(v T)M()の場合、(&v).M()は&vを*vとして解釈している
+// メソッドを使うことでレシーバーの指す変数を変更でき、大きな構造体のコピーを行わず操作できる。
+type Vertex struct {
+	X, Y float64
+}
+
+// 変数レシーバー
+func (v Vertex) Abs() float64 {
+	return math.Sqrt(v.X*v.X + v.Y*v.Y)
+}
+
+// ポインタレシーバー
+func (v *Vertex) Scale(f float64) {
+	v.X = v.X * f
+	v.Y = v.Y * f
+}
+
 func main() {
 	// rand.Seed(time.Now().UnixNano())
 	// fmt.Println("hello world!")
@@ -226,5 +272,12 @@ func main() {
 	// point(29)
 	//printL()
 	// primes()
-	fmt.Println(getPersonInfo())
+	// fmt.Println(getPersonInfo())
+	// f := fibonacci()
+	// for i := 0; i < 6; i++ {
+	// 	fmt.Println(f())
+	// }
+	v := Vertex{3, 4}
+	v.Scale(10)
+	fmt.Println(v.Abs())
 }
