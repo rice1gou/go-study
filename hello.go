@@ -249,6 +249,21 @@ func (v *Vertex) Scale(f float64) {
 	v.Y = v.Y * f
 }
 
+// エラー: func (e エラー名) Error() stringを拡張し、エラーハンドリングを行う。
+// 基本的には、戻り値のエラーがnilかどうかで呼び出し元はエラーハンドリングを行う。
+type ErrPositiveNumber int
+
+func (e ErrPositiveNumber) Error() string {
+	return fmt.Sprintf("%v is not negative", int(e))
+}
+
+func negativeNumber(n int) (int, error) {
+	if n > 0 {
+		return n, ErrPositiveNumber(n)
+	}
+	return n, nil
+}
+
 func main() {
 	// rand.Seed(time.Now().UnixNano())
 	// fmt.Println("hello world!")
@@ -277,7 +292,9 @@ func main() {
 	// for i := 0; i < 6; i++ {
 	// 	fmt.Println(f())
 	// }
-	v := Vertex{3, 4}
-	v.Scale(10)
-	fmt.Println(v.Abs())
+	// v := Vertex{3, 4}
+	// v.Scale(10)
+	// fmt.Println(v.Abs())
+	fmt.Println(negativeNumber(10))
+	fmt.Println(negativeNumber(-100))
 }
