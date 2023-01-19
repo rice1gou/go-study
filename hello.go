@@ -7,10 +7,10 @@ import (
 	"math"
 	// 複素数パッケージ
 	"math/cmplx"
-	// ランダム数値取得用
-
 	// 時間取得のパッケージ
 	"time"
+	// 文字列操作パッケージ
+	"strings"
 )
 
 // 変数定義
@@ -75,6 +75,15 @@ func while(limit int) int {
 	return sum
 }
 
+// スライスやマップの繰り返しにはrangeを利用する。
+// rangeはインデックスと値を返す。
+func primes() {
+	var primes = []int{2, 3, 5, 7, 11, 13, 17, 19}
+	for i, v := range primes {
+		fmt.Println(i, v)
+	}
+}
+
 // 分岐処理
 // if:forと同様に条件式の前に簡単なステートメントを記述することができる
 func pow(x, n, limit float64) float64 {
@@ -86,6 +95,7 @@ func pow(x, n, limit float64) float64 {
 
 // switch: 条件ステートメントを書けばその条件に一致するcaseブロックへ、
 // 省略するとcase文の条件式がtrueになるブロックへ分岐する。
+// case文に型を記述することによって値に渡されたインターフェイスの型との比較ができる
 func greet() {
 	t := time.Now()
 	switch {
@@ -135,6 +145,7 @@ func point(p1 int) {
 // sliceは長さ（length）と容量（capacity）を持っている
 // それぞれlen()とcap()で取得できる。
 // sliceの長さ、容量がゼロの時はnilになる
+// 末尾追加: append(s, vs ...T) []T 追加先のスライスの容量を超える場合は参照先を変更したスライスを返す。
 func printL() {
 	var l [10]int
 	s := l[1:5]
@@ -159,6 +170,141 @@ func printL() {
 	}
 }
 
+// Map
+// map[キーの型]値の型　キーと値のリスト。
+// make(map[キーの型]値の型)もしくはmap[キーの型]値の型{キー:値, ...}で初期化
+// v,e = m[key]とすることで、値と値の存在の真偽値を取得できる。存在しない場合、ゼロ値とfalseが代入される。
+func getPersonInfo() map[string]int {
+	type Person struct {
+		Age    int
+		Height int
+		Weight int
+	}
+	p := Person{11, 180, 70}
+	fmt.Println(p.Age, p.Height, p.Weight)
+	personInfo := make(map[string]int)
+	personInfo["age"] = p.Age
+	personInfo["height"] = p.Height
+	personInfo["weight"] = p.Weight
+	v, e := personInfo["color"]
+	fmt.Println(v, e)
+	return personInfo
+}
+
+func WordCounter(s string) map[string]int {
+	wordList := strings.Split(s, " ")
+	wc := make(map[string]int)
+	for _, v := range wordList {
+		if _, ok := wc[v]; ok {
+			wc[v] += 1
+		} else {
+			wc[v] = 1
+		}
+	}
+	return wc
+}
+
+// クロージャ: 内部変数にアクセス可能な関数を渡す関数
+// adderは内部変数sumにアクセス可能な関数を返す。
+// func adder() func() int {
+// 	sum := 0
+// 	return func (x int) int {
+// 		sum += x
+// 		return sum
+// 	}
+// }
+// pos := adder()
+// pos(1) -> 1
+// pos(1) -> 2
+// pos(4) -> 6
+
+func fibonacci() func() int {
+	n, n1 := 0, 1
+	return func() int {
+		v := n
+		n, n1 = n1, n+n1
+		return v
+	}
+}
+
+// メソッド：同パッケージ内で定義した型にメソッドを定義することができる
+// func (変数 レシーバーの型) メソッド名(メソッドの引数 引数の型) 戻り値
+// レシーバーの型をポインタにすると、ポインタレシーバになる。レシーバーが指す変数を更新することができる。
+// func (v *T) M(),func F(v *T)があるとすると、v.M(),(&v).M()はコンパイルエラーにならない
+// F(v)はエラーにならないが、F(&v)はエラーになる。これは暗黙的にvのステートメントを&vとして解釈しているからである。
+// 逆に(v T)M()の場合、(&v).M()は&vを*vとして解釈している
+// メソッドを使うことでレシーバーの指す変数を変更でき、大きな構造体のコピーを行わず操作できる。
+type Vertex struct {
+	X, Y float64
+}
+
+// 変数レシーバー
+func (v Vertex) Abs() float64 {
+	return math.Sqrt(v.X*v.X + v.Y*v.Y)
+}
+
+// ポインタレシーバー
+func (v *Vertex) Scale(f float64) {
+	v.X = v.X * f
+	v.Y = v.Y * f
+}
+
+// エラー: func (e エラー名) Error() stringを拡張し、エラーハンドリングを行う。
+// 基本的には、戻り値のエラーがnilかどうかで呼び出し元はエラーハンドリングを行う。
+type ErrPositiveNumber int
+
+func (e ErrPositiveNumber) Error() string {
+	return fmt.Sprintf("%v is not negative", int(e))
+}
+
+func negativeNumber(n int) (int, error) {
+	if n > 0 {
+		return n, ErrPositiveNumber(n)
+	}
+	return n, nil
+}
+
+// goroutin:　並列処理を行うためのやつ。
+// go f(x, y, z)でスレッドが実行される
+// Chanel: <-を使ってスレッドに送受信が行える。送受信両方の準備が整うまで実行されないので、同期周りをうまいことやってくれる。
+// c := make(chan int)で初期化
+// c <- 2 で送信
+// x := <- cで受信
+// Buffer: チャネルにバッファを持たせることができる。c := make(chan int, 10)のように2つ目の引数にバッファの長さを持たせることができる。
+// v, ok := <- c: 受信の式に２つ目のパラメータを設定することでそのチャネルがクローズしているかどうかを知ることができる。
+// switch {case c <- x...} で複数の通信操作ができる。case式のいずれかが実行可能になるまでブロックする。複数実行可能な場合はランダムで実行される。
+// どのcaseも準備できていない場合はdefaultが実行される
+// 排他制御: syncパッケージで使える。symc.MutexをLock()とUnlock()で挟むことでスレッドをロックできる。
+type SafeCounter struct {
+	mu sync.Mutex
+	v  map[string]int
+}
+// Inc increments the counter for the given key.
+func (c *SafeCounter) Inc(key string) {
+	c.mu.Lock()
+	// Lock so only one goroutine at a time can access the map c.v.
+	c.v[key]++
+	c.mu.Unlock()
+}
+
+// Value returns the current value of the counter for the given key.
+func (c *SafeCounter) Value(key string) int {
+	c.mu.Lock()
+	// Lock so only one goroutine at a time can access the map c.v.
+	defer c.mu.Unlock()
+	return c.v[key]
+}
+
+func main() {
+	c := SafeCounter{v: make(map[string]int)}
+	for i := 0; i < 1000; i++ {
+		go c.Inc("somekey")
+	}
+
+	time.Sleep(time.Second)
+	fmt.Println(c.Value("somekey"))
+}
+
 func main() {
 	// rand.Seed(time.Now().UnixNano())
 	// fmt.Println("hello world!")
@@ -180,5 +326,16 @@ func main() {
 	// greet()
 	// delay()
 	// point(29)
-	printL()
+	//printL()
+	// primes()
+	// fmt.Println(getPersonInfo())
+	// f := fibonacci()
+	// for i := 0; i < 6; i++ {
+	// 	fmt.Println(f())
+	// }
+	// v := Vertex{3, 4}
+	// v.Scale(10)
+	// fmt.Println(v.Abs())
+	fmt.Println(negativeNumber(10))
+	fmt.Println(negativeNumber(-100))
 }
