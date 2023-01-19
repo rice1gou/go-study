@@ -264,6 +264,47 @@ func negativeNumber(n int) (int, error) {
 	return n, nil
 }
 
+// goroutin:　並列処理を行うためのやつ。
+// go f(x, y, z)でスレッドが実行される
+// Chanel: <-を使ってスレッドに送受信が行える。送受信両方の準備が整うまで実行されないので、同期周りをうまいことやってくれる。
+// c := make(chan int)で初期化
+// c <- 2 で送信
+// x := <- cで受信
+// Buffer: チャネルにバッファを持たせることができる。c := make(chan int, 10)のように2つ目の引数にバッファの長さを持たせることができる。
+// v, ok := <- c: 受信の式に２つ目のパラメータを設定することでそのチャネルがクローズしているかどうかを知ることができる。
+// switch {case c <- x...} で複数の通信操作ができる。case式のいずれかが実行可能になるまでブロックする。複数実行可能な場合はランダムで実行される。
+// どのcaseも準備できていない場合はdefaultが実行される
+// 排他制御: syncパッケージで使える。symc.MutexをLock()とUnlock()で挟むことでスレッドをロックできる。
+type SafeCounter struct {
+	mu sync.Mutex
+	v  map[string]int
+}
+// Inc increments the counter for the given key.
+func (c *SafeCounter) Inc(key string) {
+	c.mu.Lock()
+	// Lock so only one goroutine at a time can access the map c.v.
+	c.v[key]++
+	c.mu.Unlock()
+}
+
+// Value returns the current value of the counter for the given key.
+func (c *SafeCounter) Value(key string) int {
+	c.mu.Lock()
+	// Lock so only one goroutine at a time can access the map c.v.
+	defer c.mu.Unlock()
+	return c.v[key]
+}
+
+func main() {
+	c := SafeCounter{v: make(map[string]int)}
+	for i := 0; i < 1000; i++ {
+		go c.Inc("somekey")
+	}
+
+	time.Sleep(time.Second)
+	fmt.Println(c.Value("somekey"))
+}
+
 func main() {
 	// rand.Seed(time.Now().UnixNano())
 	// fmt.Println("hello world!")
