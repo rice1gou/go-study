@@ -11,6 +11,8 @@ import (
 	"time"
 	// 文字列操作パッケージ
 	"strings"
+	// goroutin排他制御パッケージ
+	"sync"
 )
 
 // 変数定義
@@ -279,6 +281,7 @@ type SafeCounter struct {
 	mu sync.Mutex
 	v  map[string]int
 }
+
 // Inc increments the counter for the given key.
 func (c *SafeCounter) Inc(key string) {
 	c.mu.Lock()
@@ -293,16 +296,6 @@ func (c *SafeCounter) Value(key string) int {
 	// Lock so only one goroutine at a time can access the map c.v.
 	defer c.mu.Unlock()
 	return c.v[key]
-}
-
-func main() {
-	c := SafeCounter{v: make(map[string]int)}
-	for i := 0; i < 1000; i++ {
-		go c.Inc("somekey")
-	}
-
-	time.Sleep(time.Second)
-	fmt.Println(c.Value("somekey"))
 }
 
 func main() {
@@ -336,6 +329,13 @@ func main() {
 	// v := Vertex{3, 4}
 	// v.Scale(10)
 	// fmt.Println(v.Abs())
-	fmt.Println(negativeNumber(10))
-	fmt.Println(negativeNumber(-100))
+	// fmt.Println(negativeNumber(10))
+	// fmt.Println(negativeNumber(-100))
+	c := SafeCounter{v: make(map[string]int)}
+	for i := 0; i < 1000; i++ {
+		go c.Inc("somekey")
+	}
+
+	time.Sleep(time.Second)
+	fmt.Println(c.Value("somekey"))
 }
