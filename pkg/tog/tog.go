@@ -1,7 +1,8 @@
-package main
+package tog
 
 import (
 	// 	出力用パッケージ
+
 	"fmt"
 	// 数学系パッケージ
 	"math"
@@ -331,11 +332,10 @@ func main() {
 	// fmt.Println(v.Abs())
 	// fmt.Println(negativeNumber(10))
 	// fmt.Println(negativeNumber(-100))
-	c := SafeCounter{v: make(map[string]int)}
-	for i := 0; i < 1000; i++ {
-		go c.Inc("somekey")
-	}
-
-	time.Sleep(time.Second)
-	fmt.Println(c.Value("somekey"))
+	// c := SafeCounter{v: make(map[string]int)}
+	// for i := 0; i < 1000; i++ {
+	// 	go c.Inc("somekey")
+	// }
+	// time.Sleep(time.Second)
+	// fmt.Println(c.Value("somekey"))
 }
